@@ -161,9 +161,10 @@ function varifyBlock(block) {
 
 async function saveBlock(block) {
     varifyBlock(block);
+    const blockObj = JSON.parse(block);
     client.sendMessage({
         type: 'object',
-        object: block
+        object: blockObj
     })
     currentState.updating = new Promise((resolve, reject) => {
         const blockHash = hash(block);
