@@ -133,6 +133,7 @@ async function nextBlock() {
         previd: chainTipObject.tip,
         created: currentState.prev_time,
         T: target,
+        miner: "hickmann",
         note: "hickmann/kenanhas/mnath",
         nonce: "null",
     }
