@@ -3,18 +3,20 @@ const crypto = require('crypto');
 const { MinedBlock } = require('./models');
 const canonicalize = require('canonicalize');
 const { logger } = require('./utils');
-const { namey } = require('./name_generator');
+const { updateChainTip } = require('./client');
 
 const target = "00000002af000000000000000000000000000000000000000000000000000000";
 const nonceChunkSize = 0x10000000000000000000000000000000000000000000000000000000000;
 
 const miners = [];
 
+const chainTipObject = { tip: 0, height: 0 };
+
+let client;
+
 let currentState = {
-    publicKey: null,
-    privateKey: null,
-    height: 1, // default to 1
-    prev_id: "00000000a420b7cefa2b7730243316921ed59ffe836e111ca3801f82a4f5360e", // default to genesis block
+    publicKey: 'daa520a25ccde0adad74134f2be50e6b55b526b1a4de42d8032abf7649d14bfc',
+    privateKey: 'haha',
     block: null,
     coinbase: null,
     coinbaseHash: null,
@@ -92,24 +94,18 @@ function hash(payload) {
 }
 
 async function initPool() {
-    const tip = await MinedBlock.findOne({}).sort({ height: -1 }).exec();
-    if (tip) {
-        currentState.height = tip.height + 1;
-        currentState.prev_id = tip.blockid;
-    }
+    client = updateChainTip(chainTipObject);
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    console.log(chainTipObject);
     // start mining
     await nextBlock();
 }
 
 async function nextBlock() {
     // Generate a new keypair
-    let privateKey = ed.utils.randomPrivateKey();
-    let publicKey = await ed.getPublicKey(privateKey);
-    currentState.publicKey = Buffer.from(publicKey).toString('hex');
-    currentState.privateKey = Buffer.from(privateKey).toString('hex');
     // Generate a new coinbase transaction
     const coinbase = {
-        height: currentState.height,
+        height: chainTipObject.height,
         outputs: [
             {
                 pubkey: currentState.publicKey,
@@ -118,6 +114,10 @@ async function nextBlock() {
         ],
         type: "transaction",
     }
+    client.sendMessage({
+        type: 'object',
+        object: coinbase
+    })
     const coinbaseHash = hash(canonicalize(coinbase));
     currentState.coinbase = coinbase;
     currentState.coinbaseHash = coinbaseHash;
@@ -130,11 +130,10 @@ async function nextBlock() {
     const newBlock = {
         type: "block",
         txids: [coinbaseHash],
-        previd: currentState.prev_id,
+        previd: chainTipObject.tip,
         created: currentState.prev_time,
         T: target,
-        miner: (await namey.new())[0],
-        note: " ",
+        note: "hickmann/kenanhas/mnath",
         nonce: "null",
     }
     currentState.block = newBlock;
@@ -161,6 +160,10 @@ function varifyBlock(block) {
 
 async function saveBlock(block) {
     varifyBlock(block);
+    client.sendMessage({
+        type: 'object',
+        object: block
+    })
     currentState.updating = new Promise((resolve, reject) => {
         const blockHash = hash(block);
         const minedBlock = new MinedBlock({
@@ -168,12 +171,12 @@ async function saveBlock(block) {
             privateKey: currentState.privateKey,
             publicKey: currentState.publicKey,
             transaction: canonicalize(currentState.coinbase),
-            height: currentState.height,
+            height: chainTipObject.height,
             blockid: blockHash,
         });
         minedBlock.save();
-        currentState.height += 1;
-        currentState.prev_id = blockHash;
+        chainTipObject.height += 1;
+        chainTipObject.tip = blockHash;
         currentState.block = null;
         currentState.coinbase = null;
         currentState.coinbaseHash = null;
