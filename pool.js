@@ -54,8 +54,8 @@ async function getNextGPUTask() {
         parseInt(nonce_end_str.slice(56, 64), 16),
     ];
     const task = {
-        nonce_start: nonce_start_arr,
-        nonce_end: nonce_end_arr,
+        nonce_start: [0,0,0,0,0,0,0,0],
+        nonce_end: [16384,0,0,0,0,0,0,0],
         block_prefix: block_split[0],
         block_suffix: block_split[1],
         target: target,
@@ -120,11 +120,11 @@ async function nextBlock() {
     const coinbaseHash = hash(canonicalize(coinbase));
     currentState.coinbase = coinbase;
     currentState.coinbaseHash = coinbaseHash;
-    if (currentState.prev_time === null) {
-        currentState.prev_time = (Date.now() / 1000) | 0;
-        logger.info(`prev_time: ${currentState.prev_time}`);
-    }
-    currentState.prev_time += 2;
+    // if (currentState.prev_time === null) {
+    currentState.prev_time = (Date.now() / 1000) | 0;
+    logger.info(`prev_time: ${currentState.prev_time}`);
+    // }
+    // currentState.prev_time += 2;
     // Generate a new block
     const newBlock = {
         type: "block",
