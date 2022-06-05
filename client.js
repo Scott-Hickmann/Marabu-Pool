@@ -60,7 +60,7 @@ function updateChainTip(chainTipObject) {
       }
     } else if (message.type === 'object' && message.object.type === 'transaction') {
       if (id(message.object) === tipCoinbase && message.object.height) {
-        chainTipObject.height = message.object.height;
+        chainTipObject.height = message.object.height + 1;
       }
     } else {
       console.log(`Unknown message from fullnode: ${messageStr}`)

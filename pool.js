@@ -1,6 +1,5 @@
 const ed = require('@noble/ed25519');
 const crypto = require('crypto');
-const { MinedBlock } = require('./models');
 const canonicalize = require('canonicalize');
 const { logger } = require('./utils');
 const { updateChainTip } = require('./client');
@@ -168,15 +167,15 @@ async function saveBlock(block) {
     })
     currentState.updating = new Promise((resolve, reject) => {
         const blockHash = hash(block);
-        const minedBlock = new MinedBlock({
-            block: block,
-            privateKey: currentState.privateKey,
-            publicKey: currentState.publicKey,
-            transaction: canonicalize(currentState.coinbase),
-            height: chainTipObject.height,
-            blockid: blockHash,
-        });
-        minedBlock.save();
+        // const minedBlock = new MinedBlock({
+        //     block: block,
+        //     privateKey: currentState.privateKey,
+        //     publicKey: currentState.publicKey,
+        //     transaction: canonicalize(currentState.coinbase),
+        //     height: chainTipObject.height,
+        //     blockid: blockHash,
+        // });
+        // minedBlock.save();
         chainTipObject.height += 1;
         chainTipObject.tip = blockHash;
         currentState.block = null;
