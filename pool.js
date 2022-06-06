@@ -180,11 +180,12 @@ async function saveBlock(block) {
         currentState.coinbase = null;
         currentState.coinbaseHash = null;
         currentState.nonce = 0;
-        nextBlock().finally(() => {
-            setTimeout(() => {
+        updateChainTip(chainTipObject);
+        setTimeout(() => {
+            nextBlock().finally(() => {
                 resolve();
-            }, 5000);
-        });
+            })
+        }, 5000);
     })
     await currentState.updating;
 }

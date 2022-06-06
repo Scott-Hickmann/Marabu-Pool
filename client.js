@@ -25,17 +25,13 @@ function getClient() {
   return client
 }
 
+const client = getClient()
+
 function updateChainTip(chainTipObject) {
-  const client = getClient()
   let tipCoinbase;
   client.sendMessage({
     type: 'getchaintip'
   })
-  setInterval(() => {
-    client.sendMessage({
-      type: 'getchaintip'
-    })
-  }, 10000);
   client.netSocket.on('error', e => console.log(e))
   client.on('message', (messageStr) => {
     const message = JSON.parse(messageStr)
