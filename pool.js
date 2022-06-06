@@ -166,7 +166,7 @@ async function saveBlock(block) {
         object: blockObj
     })
     currentState.updating = new Promise((resolve, reject) => {
-        const blockHash = hash(block);
+        // const blockHash = hash(block);
         // const minedBlock = new MinedBlock({
         //     block: block,
         //     privateKey: currentState.privateKey,
@@ -176,14 +176,14 @@ async function saveBlock(block) {
         //     blockid: blockHash,
         // });
         // minedBlock.save();
-        chainTipObject.height += 1;
-        chainTipObject.tip = blockHash;
         currentState.block = null;
         currentState.coinbase = null;
         currentState.coinbaseHash = null;
         currentState.nonce = 0;
         nextBlock().finally(() => {
-            resolve();
+            setTimeout(() => {
+                resolve();
+            }, 5000);
         });
     })
     await currentState.updating;
