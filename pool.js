@@ -9,13 +9,12 @@ const nonceChunkSize = 0x1000000000000000000000000000000000000000000000000000000
 
 const miners = [];
 
-const chainTipObject = { tip: 0, height: 0 };
+const chainTipObject = { tip: 0, height: 0, mempool: [] };
 
 let client;
 
 let currentState = {
     publicKey: 'daa520a25ccde0adad74134f2be50e6b55b526b1a4de42d8032abf7649d14bfc',
-    privateKey: 'haha',
     block: null,
     coinbase: null,
     coinbaseHash: null,
@@ -128,7 +127,7 @@ async function nextBlock() {
     // Generate a new block
     const newBlock = {
         type: "block",
-        txids: [coinbaseHash],
+        txids: [coinbaseHash, ...chainTipObject.mempool],
         previd: chainTipObject.tip,
         created: currentState.prev_time,
         T: target,
@@ -169,7 +168,6 @@ async function saveBlock(block) {
         // const blockHash = hash(block);
         // const minedBlock = new MinedBlock({
         //     block: block,
-        //     privateKey: currentState.privateKey,
         //     publicKey: currentState.publicKey,
         //     transaction: canonicalize(currentState.coinbase),
         //     height: chainTipObject.height,

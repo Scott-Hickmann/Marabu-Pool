@@ -32,6 +32,9 @@ function updateChainTip(chainTipObject) {
   client.sendMessage({
     type: 'getchaintip'
   })
+  client.sendMessage({
+    type: 'getmempool'
+  })
   client.netSocket.on('error', e => console.log(e))
   client.on('message', (messageStr) => {
     const message = JSON.parse(messageStr)
@@ -41,6 +44,8 @@ function updateChainTip(chainTipObject) {
         type: 'getobject',
         objectid: message.blockid
       })
+    } else if (message.type === 'mempool') {
+      chainTipObject.mempool = message.txids
     } else if (message.type === 'object' && message.object.type === 'block') {
       const objectid = id(message.object)
 
